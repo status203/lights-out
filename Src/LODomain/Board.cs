@@ -9,7 +9,11 @@ namespace LODomain
     {
         public const int BoardSize = 5;
         
-        private bool HaveMoved { get; set; }
+        /// <summary>
+        /// Whether NewGame has been called.
+        /// </summary>
+        /// <value></value>
+        private bool GameCreated { get; set; }
 
         // Go with the dense 'jagged' array representation for ease of returning
         // enumerables externally.
@@ -62,7 +66,7 @@ namespace LODomain
         /// <returns></returns>
         public bool IsComplete() {
             // TODO: If performance became an issue, could track # of lit lights in MakeMove instead. (Could then also disallow further moves once completed)
-            return HaveMoved 
+            return GameCreated 
                 && Lights.Flatten().Count(light => light == LightState.On) == 0;
         }
 
@@ -79,7 +83,7 @@ namespace LODomain
                 _lights[togglee.Row][togglee.Column] = newState;
             }
 
-            HaveMoved = true;
+            GameCreated = true;
         }
 
         /// <summary>

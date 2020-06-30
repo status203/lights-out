@@ -1,0 +1,1 @@
+See [this StackOverflow answer](https://gaming.stackexchange.com/a/11125) for a strategy for the 5x5 Lights Out.
