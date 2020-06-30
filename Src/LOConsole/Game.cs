@@ -20,8 +20,11 @@ namespace LOConsole
 
         public void Run()
         {
+            var firstTurn = true;
             do
             {
+                if (!firstTurn) Console.WriteLine();
+
                 DisplayBoard();
 
                 var command = RequestCommand();
@@ -32,6 +35,7 @@ namespace LOConsole
                 }
 
                 PerformCommand(command);
+                firstTurn = false;
             } while (!Board.IsComplete());
 
             DisplaySuccess();
