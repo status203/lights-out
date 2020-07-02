@@ -12,10 +12,21 @@ namespace LOConsole
 
         private Board Board { get; set; }
 
+        private GameMode Mode { get; set; }
+
+
+        /// <summary>
+        /// Whether the last command changed the state. If not, then don't 
+        /// redisplay state.
+        /// </summary>
+        private bool StateChanged { get; set; }
+
         public Game()
         {
             Board = new Board();
             Board.NewGame();
+            Mode = GameMode.Play;
+            StateChanged = true;
         }
 
         public void Run()
@@ -25,20 +36,22 @@ namespace LOConsole
             {
                 if (!firstTurn) Console.WriteLine();
 
-                DisplayBoard();
+                if (StateChanged)
+                {
+                    DisplayBoard();
+                }
 
                 var command = RequestCommand();
 
-                if (command.Exit)
-                {
-                    return;
-                }
+                ExecuteCommand(command);
 
-                PerformCommand(command);
                 firstTurn = false;
-            } while (!Board.IsComplete());
+            } while (Mode != GameMode.Exit);
 
-            DisplaySuccess();
+            if (Board.IsComplete())
+            {
+                DisplaySuccess();
+            }
         }
 
         private static void DisplaySuccess()
@@ -46,13 +59,48 @@ namespace LOConsole
             using (var ctx = new ConsoleContext())
             {
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("Congratulations. You won!. Run the program again for a new board.");
+                Console.WriteLine("Congratulations. You won!.");
+                Console.WriteLine("Run the program again for a new board.");
             }
         }
 
-        private void PerformCommand(GameCommand command)
+        /// <summary>
+        /// Executes the supplied game command.
+        /// </summary>
+        /// <param name="command"></param>
+        private void ExecuteCommand(GameCommand command)
         {
-            Board.MakeMove(command.Location);
+            // Most cases will change state.
+            StateChanged = true;
+
+            switch (command.Command)
+            {
+                case Commands.MakeMove:
+                    Board.MakeMove(command.Location);
+                    if (Board.IsComplete()) Mode = GameMode.Exit;
+                    break;
+
+                case Commands.ToggleLight:
+                    Board.ToggleLight(command.Location);
+                    break;
+
+                case Commands.ToggleEdit:
+                    Mode = Mode == GameMode.Play
+                        ? GameMode.Edit
+                        : GameMode.Play;
+                    break;
+
+                case Commands.Exit:
+                    Mode = GameMode.Exit;
+                    break;
+
+                default:
+                    // Unknown command
+                    DisplayCommandSummary();
+                    StateChanged = false;
+                    break;
+            }
+
         }
 
         /// <summary>
@@ -62,29 +110,31 @@ namespace LOConsole
         /// <returns></returns>
         private GameCommand RequestCommand()
         {
-            LightLocation location = null;
-            var firstRequest = true;
-            while (location == null)
+            Console.Write("Please enter a location or command: ");
+            var command = Console.ReadLine().Trim().ToLower();
+
+            // Plain commands
+            switch (command)
             {
-                if (!firstRequest)
-                {
-                    DisplayCommandSummary();
-                }
+                case "exit":
+                    return new GameCommand(Commands.Exit);
 
-                Console.Write("Please enter a location or 'exit': ");
-                var command = Console.ReadLine().Trim().ToLower();
-
-                var exitCommands = new List<string> { "exit", "quit", "i've had enough" };
-                if (exitCommands.Contains(command))
-                {
-                    return new GameCommand(location: null, exit: true);
-                }
-
-                location = ParseLocation(command);
-                firstRequest = false;
+                case "edit":
+                    return new GameCommand(Commands.ToggleEdit);
             }
 
-            return new GameCommand(location, exit: false);
+            // Commands that take a location (based on mode)
+            var location = ParseLocation(command);
+            if (location != null)
+            {
+                return new GameCommand(
+                    Mode == GameMode.Play ? Commands.MakeMove : Commands.ToggleLight,
+                    location
+                );
+            }
+
+            // Unknown command
+            return new GameCommand(Commands.Unknown);
         }
 
         /// <summary>
@@ -125,7 +175,8 @@ namespace LOConsole
             using (var ctx = new ConsoleContext())
             {
                 Console.ForegroundColor = ConsoleColor.DarkMagenta;
-                Console.WriteLine("I didn't recognise that command. Please enter a light location, e.g. 'A1' or 'a1' for the top-left, or 'exit' to quit.");
+                Console.WriteLine("I didn't recognise that command.");
+                Console.WriteLine("Please enter a light location, e.g. 'A1' or 'a1' for the top-left, 'edit' to toggle edit mode on or off, or 'exit' to quit.");
             }
         }
 
@@ -133,6 +184,11 @@ namespace LOConsole
         {
             using (var ctx = new ConsoleContext())
             {
+                if (Mode == GameMode.Edit)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("*** Board is in EDIT mode. Lights will be toggled individually ***");
+                }
 
                 Console.ForegroundColor = _labelColor;
                 Console.WriteLine("   1 2 3 4 5");

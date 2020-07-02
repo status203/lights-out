@@ -9,18 +9,22 @@ namespace LOConsole
         /// something other than a move.
         /// </summary>
         /// <value></value>
-        internal GameCommand(LightLocation location, bool exit)
+        internal GameCommand(Commands command, LightLocation location = null)
         {
             this.Location = location;
-            this.Exit = exit;
-
+            Command = command;
         }
-        public LightLocation Location { get; private set; }
-
         /// <summary>
-        /// Whether the user has requested to end the game.
+        /// What type of action to take.
         /// </summary>
         /// <value></value>
-        public bool Exit { get; private set; }
+        public Commands Command { get; private set; }
+
+        /// <summary>
+        /// What location to use with the action if appropriate, null otherwise.
+        /// </summary>
+        /// <value></value>
+        public LightLocation Location { get; private set; }
+
     }
 }

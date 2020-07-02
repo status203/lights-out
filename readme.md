@@ -6,13 +6,13 @@
 ## How
     dotnet run --project Src/LOConsole/
 
-See [this StackOverflow answer](https://gaming.stackexchange.com/a/11125) for a strategy for the 5x5 Lights Out.
+See [this StackExchange answer](https://gaming.stackexchange.com/a/11125) for a strategy for the 5x5 Lights Out.
 
 ## Why
 Because it has actual edge and corner cases?
 
-## Where
-Wherever you like (and have access to a computer!).
-
 ## When
 Whenever you like (and have access to a computer!).
+
+## Where
+Wherever you like (and have access to a computer!).

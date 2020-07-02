@@ -140,5 +140,23 @@ namespace LODomain.Test
 
             Assert.That(result, Is.True);
         }
+
+        [Test]
+        public void ToggleLight_TogglesExpectedCells()
+        {
+             var board = new Board();
+             var location1 = new LightLocation(0,2);
+             var location2 = new LightLocation(1,2);
+            
+            board.ToggleLight(location1);
+            board.ToggleLight(location2);
+            board.ToggleLight(location2);
+            var result = board.Lights.Flatten();
+            var expected = BoardLightsCreator(new (int Row, int Column)[] {
+                (0,2)
+            }).Flatten();
+            
+            Assert.That(result, Is.EqualTo(expected));           
+        }
     }
 }

@@ -122,5 +122,11 @@ namespace LODomain
                      column: light.Column + delta.Column
             ));
         }
+
+        public void ToggleLight(LightLocation light) {
+            var currentState = _lights[light.Row][light.Column];
+            var newState = ToggledState(currentState);
+            _lights[light.Row][light.Column] = newState;
+        }
     }
 }
