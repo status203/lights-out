@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Common;
 using LODomain;
@@ -9,6 +10,16 @@ namespace LOConsole
     public class Game
     {
         private const ConsoleColor _labelColor = ConsoleColor.Cyan;
+
+        public Game(GameConfiguration configuration, Board board, GameMode mode, bool stateChanged)
+        {
+            this.Configuration = configuration;
+            this.Board = board;
+            this.Mode = mode;
+            this.StateChanged = stateChanged;
+
+        }
+        private GameConfiguration Configuration { get; }
 
         private Board Board { get; set; }
 
@@ -21,9 +32,10 @@ namespace LOConsole
         /// </summary>
         private bool StateChanged { get; set; }
 
-        public Game()
+        public Game(GameConfiguration config)
         {
-            Board = new Board();
+            Configuration = config;
+            Board = new Board(Configuration.BoardSize);
             Board.NewGame();
             Mode = GameMode.Play;
             StateChanged = true;
@@ -149,26 +161,33 @@ namespace LOConsole
             var stripped = new string(
                 command
                     .ToList()
-                    .Where(c => !stripChars.Contains(c))
+                    .Where(c => !c.IsContainedIn(stripChars))
                     .ToArray()
             );
 
-            var validRows = "abcde";
-            var validCols = "12345";
+            // TODO: Calculate and store valid labels in constructor.
+            var validRows = CalculateValidRows(Configuration.BoardSize);
+            var validCols = CalculateValidColumns(Configuration.BoardSize);
             if (
                 stripped.Length != 2
-                || !validRows.Contains(stripped[0])
-                || !validCols.Contains(stripped[1])
+                || !stripped[0].IsContainedIn(validRows)
+                || !stripped[1].IsContainedIn(validCols)
             )
             {
                 return null;
             }
 
             return new LightLocation(
-                row: stripped[0] - (int)'a',
+                row: stripped[0] - 'a',
                 column: Int16.Parse(stripped[1].ToString()) - 1
             );
         }
+
+        private IEnumerable<char> CalculateValidColumns(int boardSize) =>
+            Enumerable.Range(0, boardSize).Select(i => (char)('1' + i));
+
+        private IEnumerable<char> CalculateValidRows(int boardSize) =>
+            Enumerable.Range(0, boardSize).Select(i => (char)('a' + i));
 
         private void DisplayCommandSummary()
         {
@@ -191,7 +210,12 @@ namespace LOConsole
                 }
 
                 Console.ForegroundColor = _labelColor;
-                Console.WriteLine("   1 2 3 4 5");
+                var rowLabels = "   " + string.Join(
+                    ' ',
+                    Enumerable.Range(1, Configuration.BoardSize)
+                );
+                    
+                Console.WriteLine(rowLabels);
                 Console.WriteLine();
 
                 var rowLabel = 'A';

@@ -26,26 +26,42 @@ namespace LODomain.Test
             return lights;
         }
 
-        [Test]
-        public void Lights_ConstructedBoard_Creates5x5Board()
+        [TestCase(1)]
+        [TestCase(2)]
+        [TestCase(3)]
+        [TestCase(5)]
+        [TestCase(15)]
+        public void Lights_ConstructedBoard_CreatesBoardOfExpectedSize(int size)
         {
-            var board = new Board();
+            var board = new Board(size);
 
             var result = board.Lights;
-            var expectedRowCount = 5;
-            var expectedColumnCount = 5;
 
             Assert.That(result, Is.Not.Null);
-            Assert.That(result.Count(), Is.EqualTo(expectedRowCount));
+            Assert.That(result.Count(), Is.EqualTo(size));
             foreach(var row in result) {
-                Assert.That(row.Count(), Is.EqualTo(expectedColumnCount));
+                Assert.That(row.Count(), Is.EqualTo(size));
             }
+        }
+
+        [TestCase(1)]
+        [TestCase(2)]
+        [TestCase(3)]
+        [TestCase(5)]
+        [TestCase(15)]
+        public void Size_OfConstructedBoard_StoredCorrectly(int size)
+        {
+            var board = new Board(size);
+
+            var result = board.Size;
+
+            Assert.That(result, Is.EqualTo(size));
         }
 
         [Test]
         public void Lights_ConstructedBoard_DefaultsToAllOff()
         {
-            var board = new Board();
+            var board = new Board(5);
 
             var result = board.Lights.Flatten();
 
@@ -55,7 +71,7 @@ namespace LODomain.Test
         [Test]
         public void NewGame_AfterContstruction_ResultsInAtLeastOneLightOn()
         {
-            var board = new Board();
+            var board = new Board(5);
 
             board.NewGame();
             var result = board.Lights.Flatten().Contains(LightState.On);
@@ -66,7 +82,7 @@ namespace LODomain.Test
         [Test]
         public void MakeMove_OnInternalLight_TogglesExpectedCells()
         {
-            var board = new Board();
+            var board = new Board(5);
             var light = new LightLocation(1, 2);
 
             board.MakeMove(light);
@@ -81,7 +97,7 @@ namespace LODomain.Test
         [Test]
         public void MakeMove_OnCornerLight_TogglesExpectedCells()
         {
-            var board = new Board();
+            var board = new Board(5);
             var light = new LightLocation(0, 0);
 
             board.MakeMove(light);
@@ -96,7 +112,7 @@ namespace LODomain.Test
         [Test]
         public void MakeMove_OnEdgeLight_TogglesExpectedCells()
         {
-            var board = new Board();
+            var board = new Board(5);
             var light = new LightLocation(0,2);
             
             board.MakeMove(light);
@@ -111,7 +127,7 @@ namespace LODomain.Test
         [Test]
         public void IsComplete_OnConstruction_ReturnsFalse()
         {
-            var board = new Board();
+            var board = new Board(5);
             
             var result = board.IsComplete();
 
@@ -121,7 +137,7 @@ namespace LODomain.Test
         [Test]
         public void IsComplete_OnNewGame_ReturnsFalse()
         {
-            var board = new Board();
+            var board = new Board(5);
             board.NewGame();
 
             var result = board.IsComplete();
@@ -131,7 +147,7 @@ namespace LODomain.Test
 
         [Test]
         public void IsComplete_ClearedBoard_ReturnsTrue() {
-            var board = new Board();
+            var board = new Board(5);
             var location = new LightLocation(1,1);
             board.MakeMove(location);
             board.MakeMove(location);
@@ -144,7 +160,7 @@ namespace LODomain.Test
         [Test]
         public void ToggleLight_TogglesExpectedCells()
         {
-             var board = new Board();
+             var board = new Board(5);
              var location1 = new LightLocation(0,2);
              var location2 = new LightLocation(1,2);
             

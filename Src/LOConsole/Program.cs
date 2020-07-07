@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using Common;
 
 namespace LOConsole
 {
@@ -6,10 +9,42 @@ namespace LOConsole
     {
         static void Main(string[] args)
         {
+            var helpArgs = new List<string> {"-h", "--help"};
+            if (args.Length > 0 && args[0].IsContainedIn(helpArgs)) {
+                DisplayInstructions();
+            }
+
+            GameConfiguration config;
+            try
+            {
+                config = new GameConfiguration(args);
+            }
+            catch (InvalidDataException ex)
+            {
+                DisplayProgramHelp(ex);
+                return;
+            }
+
+
             DisplayInstructions();
 
-            var game = new Game();
+            var game = new Game(config);
             game.Run();
+        }
+
+        private static void DisplayProgramHelp(Exception ex)
+        {
+            using (var ctx = new ConsoleContext())
+            {
+                Console.WriteLine("Usage: LOConsole [board-size: 1-10]");
+
+                if (ex != null)
+                {
+                    Console.ForegroundColor = ConsoleColor.Magenta;
+                    Console.WriteLine();
+                    Console.WriteLine(ex.Message);
+                }
+            }
         }
 
         private static void DisplayInstructions()
@@ -25,10 +60,11 @@ namespace LOConsole
 
             // Console.ForegroundColor = ConsoleColor.Green;
 
-             foreach(var para in paras) {
-                 Console.WriteLine(para);
-                 Console.WriteLine();
-             }
+            foreach (var para in paras)
+            {
+                Console.WriteLine(para);
+                Console.WriteLine();
+            }
         }
     }
 }

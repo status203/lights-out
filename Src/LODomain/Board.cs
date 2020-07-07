@@ -7,8 +7,6 @@ namespace LODomain
 {
     public class Board
     {
-        public const int BoardSize = 5;
-        
         /// <summary>
         /// Whether NewGame has been called.
         /// </summary>
@@ -30,12 +28,18 @@ namespace LODomain
         }
 
         /// <summary>
-        /// Construct the board with all ligts off.
+        /// Size (width and height) of board
         /// </summary>
-        public Board()
+        public int Size { get; }
+
+        /// <summary>
+        /// Construct the board of given size with all ligts off.
+        /// </summary>
+        public Board(int size)
         {
-            _lights = Enumerable.Range(1, 5).Select<int, List<LightState>>(
-                i => Enumerable.Repeat(LightState.Off, 5).ToList()
+            this.Size = size;
+            _lights = Enumerable.Range(1, size).Select<int, List<LightState>>(
+                i => Enumerable.Repeat(LightState.Off, size).ToList()
             ).ToList();            
         }
 
@@ -45,16 +49,16 @@ namespace LODomain
         /// </summary>
         public void NewGame() {
             var rnd = new Random();
-            for (var row = 0; row < BoardSize; ++row) {
-                for (var col = 0; col < BoardSize; ++col) {
+            for (var row = 0; row < Size; ++row) {
+                for (var col = 0; col < Size; ++col) {
                     _lights[row][col] = (LightState)rnd.Next(2);
                 }
             }
 
             // Check that at least one light is on, and if not set one.
             if (!Lights.Flatten().Contains(LightState.On)) {
-                var row = rnd.Next(1, BoardSize) - 1;
-                var col = rnd.Next(1, BoardSize) - 1;
+                var row = rnd.Next(1, Size) - 1;
+                var col = rnd.Next(1, Size) - 1;
                 _lights[row][col] = LightState.On;
             }
         }
@@ -106,9 +110,9 @@ namespace LODomain
             // Get all relevant light locations and then filter out the invalid ones
             return AllLightsToToggle(ligt)
                 .Where(c => c.Row >= 0
-                            && c.Row < BoardSize
+                            && c.Row < Size
                             && c.Column >= 0
-                            && c.Column < BoardSize);
+                            && c.Column < Size);
         }
 
         private IEnumerable<LightLocation> AllLightsToToggle(LightLocation light)
